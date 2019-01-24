@@ -1,0 +1,1119 @@
+Spender Selection VF page CBM
+
+<apex:page controller="CCG_SpenderSelectionConfiguration" sidebar="false">
+    <apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"/>
+    <apex:includeScript value="//ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"/>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.SLDS260, 'assets/styles/salesforce-lightning-design-system.min.css')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.aljsLightning)}"/>
+    
+    <apex:slds />
+    
+    <!--for custom CSS.-->
+    <apex:stylesheet value="{!URLFOR($Resource.CCG_SpenderSelection)}"/>
+    
+    <script id="allTabs" type="text/x-handlebars-template">
+        <div class="slds-tabs--default" data-aljs="parentTabs" id="mainPanelDiv">
+            <ul class="slds-tabs--default__nav" role="tablist">
+                <li class="slds-tabs--default__item slds-text-heading--label" title="Item One" role="presentation"><a class="slds-tabs--default__link" href="#" role="tab" tabindex="0" aria-selected="true" aria-controls="objectFlterFields" data-aljs-show="objectFlterFields">{!$Label.CBM_SetFilterFields}</a></li>
+                <li class="slds-tabs--default__item slds-text-heading--label" title="Item One" role="presentation"><a class="slds-tabs--default__link" href="#" role="tab" tabindex="1" aria-selected="true" aria-controls="setColumnsTab" data-aljs-show="setColumnsTab">{!$Label.CBM_SetColumn}</a></li>
+            </ul>
+            
+            <div id="objectFlterFields" class="slds-tabs--default__content slds-hide" role="tabpanel">
+                
+                <div id="noMoreFields"  class="slds-hide"> {!$Label.CBM_You_Can_Select_Maximum_Fields} </div>
+                    <div class="slds-tabs--default" data-aljs="tabs" id="mainDiv">
+                        <ul class="slds-tabs--default__nav" role="tablist" id="ObjectTabList">
+                            {{#each objName}}
+                                <li class="slds-tabs--default__item slds-text-heading--label" title="Item One" role="presentation"><a class="slds-tabs--default__link" href="#" role="tab" tabindex="{{@index}}" aria-selected="true" aria-controls="{{obj}}" data-aljs-show="{{obj}}">{{objLabel}}</a></li>
+                                
+                                <li>
+                                    <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button btnPadding btn" onclick="confirm('{!$Label.CBM_RemoveObject}') && addRemoveObject('Delete','{{obj}}',null);">
+                                          <!-- <svg class="slds-button__icon " aria-hidden="true">
+                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#close" />
+                                          </svg>
+                                           -->
+                                    </button>
+                                <li>
+                                <!-- {{#if (checkLength @index)}}
+                                        <li style="padding-left:35px">
+                                            <button aria-controls="expando-unique-id2" aria-expanded="true" class="slds-button btnPadding btn" onclick="$('#addObjectModal').removeClass('slds-hide');">
+                                                  <svg class="slds-button__icon" aria-hidden="true">
+                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#add" />
+                                                  </svg>
+                                                  
+                                            </button>
+                                        <li>
+                                        
+                                {{/if}} -->
+                                
+                            {{/each}}
+                            
+                        </ul>
+                        {{#if objName}}
+                            {{#each objName}}
+                                <div id="{{obj}}" class="slds-tabs--default__content slds-hide" role="tabpanel">
+                                    <div class="slds-grid slds-gutters" >
+                                        <div class="slds-form-element">
+                                            <div class="slds-picklist--draggable slds-grid" data-aljs="multi-select{{obj}}">
+                                                <div class="slds-form-element">
+                                                    <span class="slds-form-element__label" aria-label="select-1">{!$Label.CBM_AllAvailableFields}</span>
+                                                    <div class="slds-picklist slds-picklist--multi" data-aljs-multi-select="unselected" id="unSelected{{obj}}">
+                                                        <ul class="slds-picklist__options slds-picklist__options--multi shown"></ul>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-grid slds-grid--vertical">
+                                                    <button class="slds-button slds-button--icon-container" data-aljs-multi-select="select" id="btnRight{{obj}}"  onclick="shiftFieldsToSelectedList('{{obj}}',this.id,'right');return false;">
+                                                        <svg aria-hidden="true" class="slds-button__icon">
+                                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#right"></use>
+                                                        </svg>
+                                                        <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                    </button>
+                                                    <button class="slds-button slds-button--icon-container" data-aljs-multi-select="unselect" onclick="shiftFieldsToSelectedList('{{obj}}','btnRight{{obj}}','left');return false;">
+                                                        <svg aria-hidden="true" class="slds-button__icon">
+                                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#left"></use>
+                                                        </svg>
+                                                        <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                    </button>
+                                                </div>
+                                                <div class="slds-form-element">
+                                                    <span class="slds-form-element__label" aria-label="select-2">{!$Label.CBM_SelectedFields}</span>
+                                                    <div class="slds-picklist slds-picklist--multi" data-aljs-multi-select="selected" id="selected{{obj}}">
+                                                       <ul class="slds-picklist__options slds-picklist__options--multi shown"></ul>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-grid slds-grid--vertical">
+                                                    <button class="slds-button slds-button--icon-container" data-aljs-multi-select="move-up">
+                                                        <svg aria-hidden="true" class="slds-button__icon">
+                                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#up"></use>
+                                                        </svg>
+                                                        <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                    </button>
+                                                    <button class="slds-button slds-button--icon-container" data-aljs-multi-select="move-down">
+                                                        <svg aria-hidden="true" class="slds-button__icon">
+                                                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#down"></use>
+                                                        </svg>
+                                                        <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                            <button class="slds-button slds-button_brand" onclick="SaveFilterFilter(); return false;">{!$Label.CBM_SaveFilterFields}</button>
+                        {{else}}
+                            <div id="noValueInCS"  >{!$Label.CBM_selectObjectErr}
+                                <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button btnPadding" onclick="$('#addObjectModal').removeClass('slds-hide');" style="padding-left:35px">
+                                      <svg class="slds-button__icon" aria-hidden="true">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#add" />
+                                      </svg>
+                                      
+                                </button>
+                            </div>
+                        {{/if}}
+                    </div>
+            </div>
+            <div id="setColumnsTab" class="slds-tabs--default__content" role="tabpanel">
+                <div class="slds-tabs--default" data-aljs="subTabsColumns" id="mainPanelDiv1">
+                    <ul class="slds-tabs--default__nav" role="tablist">
+                        <li class="slds-tabs--default__item slds-text-heading--label" title="Item One" role="presentation"><a class="slds-tabs--default__link" href="#" role="tab" tabindex="0" aria-selected="true" aria-controls="setColumns" data-aljs-show="setColumns">{!$Label.CBM_Custom}</a></li>
+                        <li class="slds-tabs--default__item slds-text-heading--label" title="Item One" role="presentation"><a class="slds-tabs--default__link" href="#" role="tab" tabindex="1" aria-selected="true" aria-controls="custom" data-aljs-show="custom">{!$Label.CBM_Standard}</a></li>
+                    </ul>
+                    
+                    <div id="setColumns" class="slds-tabs--default__content slds-hide" role="tabpanel">
+                        
+                    </div>
+                    <div id="custom" class="slds-tabs--default__content slds-hide" role="tabpanel">
+                        
+                    </div>
+                    
+                 </div>
+                 
+                 <button class="slds-button slds-button_brand btnSave" id="saveBtn" onclick="saveColumns(); return false;" > {!$Label.CBM_Save} </button>
+            </div>
+        </div>
+    </script>
+    
+    
+    <script id="customObjectsColumn" type="text/x-handlebars-template">
+                <div class="slds-tabs--default" data-aljs="tabsCustomColumnObject" id="customObjectsColumnDiv">
+                    <ul class="slds-tabs--default__nav" role="tablist" id="ObjectTabList1">
+                        {{#each objName}}
+                            <li class="slds-tabs--default__item slds-text-heading--label" title="Item One" role="presentation"><a class="slds-tabs--default__link" href="#" role="tab" tabindex="{{@index}}" aria-selected="true" aria-controls="{{obj}}" data-aljs-show="{{obj}}">{{objLabel}}</a></li>
+                        {{/each}}
+                        
+                    </ul>
+                    {{#if objName}}
+                        {{#each objName}}
+                            <div id="{{obj}}" class="slds-tabs--default__content" role="tabpanel">
+                                <div class="slds-grid slds-gutters" >
+                                    <div class="slds-form-element">
+                                        <div class="slds-picklist--draggable slds-grid" data-aljs="multi-select{{obj}}">
+                                            <div class="slds-form-element">
+                                                <span class="slds-form-element__label" aria-label="select-1">{!$Label.CBM_AllAvailableFields}</span>
+                                                <div class="slds-picklist slds-picklist--multi" data-aljs-multi-select="unselected" id="unSelected{{obj}}">
+                                                    <ul class="slds-picklist__options slds-picklist__options--multi shown"></ul>
+                                                </div>
+                                            </div>
+                                            <div class="slds-grid slds-grid--vertical">
+                                                <button class="slds-button slds-button--icon-container" data-aljs-multi-select="select" id="btnRight{{obj}}"  onclick="shiftFieldsToSelectedList('{{obj}}',this.id,'right');return false;">
+                                                    <svg aria-hidden="true" class="slds-button__icon">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#right"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                </button>
+                                                <button class="slds-button slds-button--icon-container" data-aljs-multi-select="unselect" onclick="shiftFieldsToSelectedList('{{obj}}','btnRight{{obj}}','left');return false;">
+                                                    <svg aria-hidden="true" class="slds-button__icon">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#left"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                </button>
+                                                
+                                            </div>
+                                            <div class="slds-form-element">
+                                                <span class="slds-form-element__label" aria-label="select-2">{!$Label.CBM_SelectedFields}</span>
+                                                <div class="slds-picklist slds-picklist--multi" data-aljs-multi-select="selected" id="selected{{obj}}">
+                                                   <ul class="slds-picklist__options slds-picklist__options--multi shown"></ul>
+                                                </div>
+                                            </div>
+                                            <div class="slds-grid slds-grid--vertical">
+                                                <button class="slds-button slds-button--icon-container" data-aljs-multi-select="move-up">
+                                                    <svg aria-hidden="true" class="slds-button__icon">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#up"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                </button>
+                                                <button class="slds-button slds-button--icon-container" data-aljs-multi-select="move-down">
+                                                    <svg aria-hidden="true" class="slds-button__icon">
+                                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#down"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">{!$Label.CBM_PickList}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        {{/each}}
+                        <!--<button class="slds-button slds-button_brand" onclick="SaveFilterFilter(); return false;">{!$Label.CBM_SaveFilterFields}</button>-->
+                    {{else}}
+                        <div id="noValueInCS"  >{!$Label.CBM_selectObjectErr}
+                            <button aria-controls="expando-unique-id" aria-expanded="true" class="slds-button btnPadding" onclick="$('#addObjectModal').removeClass('slds-hide');" style="padding-left:35px">
+                                  <svg class="slds-button__icon" aria-hidden="true">
+                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#add" />
+                                  </svg>
+                                  
+                            </button>
+                        </div>
+                    {{/if}}
+                </div>
+    </script>
+    
+    <script id="addObjectInterface" type="text/x-handlebars-template">
+            <div class="slds-grid slds-gutters" >
+                  <div class="slds-col">
+                        <ul>
+                            <li>
+                                <label>{!$Label.CBM_SelectObject}</label>
+                                <div class="slds-select_container">
+                                     <select size="1" class="slds-select" onchange="showFieldsPerSelectedObject($('#selectObject option:selected').val());$('#selectObject').css('border','');" id="selectObject" label-value="{!$Label.CBM_Select}">
+                                        <option value="{!$Label.CBM_Select}"  selected>{!$Label.CBM_Select}</option>
+                                        {{#each objNameDesc}}
+                                            <option value="{{objectApiName}}">{{objectLabel}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
+                            </li>
+                            <li id="objFields">
+                                
+                            </li>
+                        </ul>
+                  </div>
+             </div>
+      </script>
+      
+      <script id="SelectAccFieldForSelectedObject" type="text/x-handlebars-template">
+            <div class="slds-grid slds-gutters" >
+                  <div class="slds-col">
+                  
+                        <ul>
+                            <li>
+                                <label>{!$Label.CBM_SelectAccountField}</label>
+                                {{#if objFields}}
+                                    <div class="slds-select_container">
+                                         <select size="1" class="slds-select"  id="selectField" onchange="$('#selectField').css('border','');" label-value="{!$Label.CBM_Select}">
+                                            <option value="{!$Label.CBM_Select}"  selected>{!$Label.CBM_Select}</option>
+                                            
+                                                    {{#each objFields}}
+                                                        <option value="{{fieldApiName}}">{{fieldLabel}}</option>
+                                                    {{/each}}
+                                                    
+                                                
+                                        </select>
+                                    </div>
+                                    
+                                    {{else}}
+                                     <li>{!$Label.CBM_NoAccountRelationship}</li>
+                                {{/if}}
+                            </li>
+                        </ul>
+                  </div>
+             </div>
+      </script>
+      
+      <script id="removeObjectInterface" type="text/x-handlebars-template">
+            <div class="slds-grid slds-gutters" >
+                  <div class="slds-col">
+                        <ul>
+                            <li>
+                                <label>{!$Label.CBM_SelectObject}</label>
+                                <div class="slds-select_container">
+                                     <select size="1" class="slds-select" onchange="$('#removeObject').css('border','');" id="removeObject" label-value="{!$Label.CBM_Select}">
+                                        <option value="{!$Label.CBM_Select}"  selected>{!$Label.CBM_Select}</option>
+                                        {{#each objNameDesc}}
+                                            <option value="{{obj}}">{{objLabel}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
+                            </li>
+                           
+                        </ul>
+                  </div>
+             </div>
+      </script>
+    
+    <script id="columns" type="text/x-handlebars-template">
+            <div class="slds-grid slds-gutters" >
+                  <div class="slds-col">
+                     <span ><label  for="text-input-id-">{!$Label.CBM_ColumnName}</label><input type="text" id="text-input-id-" class="slds-input" placeholder="{!$Label.CBM_SetColumnName}" ></input></span>
+                  </div>
+                  
+                  <div class="slds-col">
+                        <label>{!$Label.CBM_AccountField}</label>
+                        <div class="slds-select_container">
+                             <select size="1" class="slds-select" onchange="$(this).css('border','');" label-value="{!$Label.CBM_Select}">
+                                <option value="{!$Label.CBM_Select}" selected>{!$Label.CBM_Select}</option>
+                                {{#each objName}}
+                                  {{#if (checkAccount obj)}}
+                                    {{#each fields}}
+                                        <option value="{{fieldApiName}}">{{fieldLabel}}</option>
+                                     {{/each}}
+                                  {{/if}}
+                                {{/each}}
+                            </select>
+                        </div>
+                  </div>
+                  
+                  <div class="slds-col">
+                    <label>{!$Label.CBM_ContactField}</label>
+                    <div class="slds-select_container">
+                        <select size="1" class="slds-select" onchange="$(this).css('border','');" label-value="{!$Label.CBM_Select}">
+                            <option value="{!$Label.CBM_Select}"  selected>{!$Label.CBM_Select}</option>   
+                            {{#each objName}}
+                              {{#if (checkContact obj)}}
+                                {{#each fields}}
+                                    <option value="{{fieldApiName}}">{{fieldLabel}}</option>
+                                 {{/each}}
+                              {{/if}}
+                            {{/each}}
+                        </select>
+                    </div>
+                  </div>
+                  
+                  <div class="slds-col">
+                    <label>Lead Fields</label>
+                    <div class="slds-select_container">
+                        <select size="1" class="slds-select" onchange="$(this).css('border','');" label-value="{!$Label.CBM_Select}">
+                            <option value="{!$Label.CBM_Select}"  selected>{!$Label.CBM_Select}</option>   
+                            {{#each objName}}
+                              {{#if (checkLead obj)}}
+                                {{#each fields}}
+                                    <option value="{{fieldApiName}}">{{fieldLabel}}</option>
+                                 {{/each}}
+                              {{/if}}
+                            {{/each}}
+                        </select>
+                    </div>
+                  </div>
+                  
+                  
+                  
+                  <div class="slds-col">
+                        <label>{!$Label.CBM_IsFixed}</label>
+                        <div class="slds-form-element__control">
+                            <span class="slds-checkbox">
+                              <input type="checkbox" name="options" id="checkbox-2" value="checkbox-2" />
+                              <label class="slds-checkbox__label" for="checkbox-2">
+                                <span class="slds-checkbox_faux"></span>
+                                <span class="slds-form-element__label"></span>
+                              </label>
+                            </span>
+                        </div>
+                  </div>
+                  
+                  <div class="slds-col">
+                       <div class="slds-form-element__control">
+                            <button class="slds-button removeRow" onclick="removeRow($(this)); return false;">
+                                    <svg aria-hidden="true" class="slds-button__icon">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#close"></use>
+                                    </svg>
+                            </button>
+                        </div>
+                  </div>
+            </div>
+            <button class="slds-button slds-button_neutral btnAddRow" id="addRowBtn" onclick="addRow('setColumns'); return false;">+ {!$Label.CBM_AddRow}</button>
+            
+     </script>
+        
+    <script>
+        function startLoading() {
+            $('.loadingBox').show();
+        }
+
+        function endLoading() {
+            $('.loadingBox').hide();
+        }
+        var dupicateColumnName = '{!$Label.CBM_FoundDuplicateColumnName}';
+        var addRowLabel = '{!$Label.CBM_AddRow}';
+        var saveLabel = '{!$Label.CBM_Save}';
+        var addRowValidation = '{!$Label.CBM_PleaseFillProper}';
+        
+        setFilter(); 
+        var allObjects=[];
+        var select = '{!$Label.CBM_Select}';
+        var columnDataForObjects = (JSON.parse('{!JSENCODE(columnDataForObjects)}'));  
+        
+        var columnCustomObjectFields = (JSON.parse('{!JSENCODE(columnCustomObjectFields)}')); 
+       
+        var columnsDetail = JSON.parse(('{!columnsDetail}').replace(/(&quot\;)/g, '\"'));
+    </script>
+    
+    <div class="slds-notify_container slds-is-relative slds-hide" id="successColumns">
+        <div class="slds-notify slds-notify_toast slds-theme_success" role="alert">
+          <span class="slds-assistive-text">{!$Label.CBM_Success}</span><!--success-->
+          <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#success" />
+            </svg>
+          </span>
+          <div class="slds-notify__content">
+            <h2 class="slds-text-heading_small ">{!$Label.CBM_changesSuccessful}</h2>
+          </div>
+          <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" title="Close" onclick="$('#successColumns').addClass('slds-hide');return false;">
+            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#close" />
+            </svg>
+            <span class="slds-assistive-text">{!$Label.CBM_Close}</span><!---Close-->
+          </button>
+        </div>
+    </div>
+    
+    <div class="slds-notify_container slds-is-relative slds-hide" id="warning">
+        <div class="slds-notify slds-notify_toast slds-theme_warning" role="alert">
+          <span class="slds-assistive-text">{!$Label.CBM_Warning}</span>
+          <span class="slds-icon_container slds-icon-utility-warning slds-m-right_small slds-no-flex slds-align-top" title="Description of icon when needed">
+            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#warning" />
+            </svg>
+          </span>
+          <div class="slds-notify__content">
+            <h2 class="slds-text-heading_small ">{!$Label.CBM_Please_fill_proper_input_in_row}</h2>
+          </div>
+          <button class="slds-button slds-button_icon slds-notify__close slds-button_icon-inverse" title="Close" onclick="$('#columnValidate').remove();">
+            <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!$Resource.SLDS260}/icons/utility-sprite/svg/symbols.svg#close" />
+            </svg>
+            <span class="slds-assistive-text">{!$Label.CBM_Close}</span><!--close-->
+          </button>
+        </div>
+    </div>
+     <!--Showing all the UI inside this tab.-->
+    <div id="allTabsContainer"></div>
+    <div id="addObjectModal" class="slds-hide">
+        <div class="demo-only" style="height: 640px;">
+          <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+              <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                  <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                  </svg>
+                  <span class="slds-assistive-text">{!$Label.CBM_Close}</span>
+                </button>
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!$Label.CBM_AddObject}</h2>
+              </header>
+              <div class="slds-modal__content slds-p-around_medium" id="addObjectModalContent">
+                
+              </div>
+              <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick="$('#addObjectModal').addClass('slds-hide');$('#selectObject').css('border','');$('#accFields').css('border','')">{!$Label.CBM_Cancel}</button>
+                <button class="slds-button slds-button_brand" id="addobjectButton" onclick="addRemoveObject('Insert',$('#selectObject option:selected').val(),$('#selectField option:selected').val());">{!$Label.CBM_AddObject}</button>
+              </footer>
+            </div>
+          </section>
+          <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </div>
+    
+    <div id="removeObjectModal" class="slds-hide">
+        <div class="demo-only" style="height: 640px;">
+          <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+              <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                  <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close" />
+                  </svg>
+                  <span class="slds-assistive-text">{!$Label.CBM_Close}</span>
+                </button>
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!$Label.CBM_RemoveObject}</h2>
+              </header>
+              <div class="slds-modal__content slds-p-around_medium" id="removeObjectModalContent">
+                
+              </div>
+              <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick="$('#removeObjectModal').addClass('slds-hide');$('#removeObject').css('border','');">{!$Label.CBM_Cancel}</button>
+                <button class="slds-button slds-button_brand" onclick="addRemoveObject('Delete',$('#removeObject option:selected').val(),null);">{!$Label.CBM_RemoveObject}</button> 
+              </footer>
+            </div>
+          </section>
+          <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </div>
+    
+    <div class="slds-spinner_container loadingBox" id="load_scrl" style="display:none;position:fixed;z-index:999;">
+        <div class="slds-spinner--brand slds-spinner slds-spinner--large" role="alert">
+            <span class="slds-assistive-text">{!$Label.CBM_Loading}</span>
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+        </div>
+    </div>
+    
+    <!--referencing JS code-->
+    <apex:includeScript value="{!URLFOR($Resource.CCG_SpenderSelectionConfig)}"/>
+    
+</apex:page>
+
+
+
+STATIC JS RESOURCE. ---->>>>
+
+
+
+//called when page loads to populate the tab(object filter Field and column tab) content (selected and non selected values per object and pre-defined columns).
+function removeRow(selectedRowElement){
+    $('#columnValidate').remove();
+    if($('#setColumns').children('div').length==2){
+       $(selectedRowElement).parent().parent().parent().remove(); 
+       $('#setColumns').children('div').find('button').each(function(){
+                $(this).attr('disabled','');
+            });
+    }else if($('#setColumns').children('div').length>1){
+        $(selectedRowElement).parent().parent().parent().remove(); 
+    }
+}
+
+
+// for columns tabs, prepulating the already set columns by user When page Loads.
+function prePopulateValues(columnsDefaultValues){
+    var i = 0;
+    for(i = 0;i<columnsDefaultValues.length;i++){
+        if(i > 0){
+            //if there is more than  one column row when page loads then call add row function after evry time  first row created.
+            addRow('setColumns');
+        }
+        var lastColumnRow = $('#setColumns').children('div').last();
+        $(lastColumnRow.find('input[type = text]')).val(columnsDefaultValues[i]['name']);
+        $(lastColumnRow.find('input[type = checkbox]')).attr('checked' , columnsDefaultValues[i]['isFixed']);
+        
+        if(columnsDefaultValues[i]['accountField']){
+            $(lastColumnRow.find('select')[0]).find('option[value = "'+columnsDefaultValues[i]['accountField']+'"]').prop('selected' , true);
+        }else{
+            $(lastColumnRow.find('select')[0]).find('option[value = "'+select+'"]').prop('selected' , true);
+        }
+        
+        if(columnsDefaultValues[i]['accountField']){
+            $(lastColumnRow.find('select')[1]).find('option[value = "'+columnsDefaultValues[i]['contactField']+'"]').prop('selected' , true);
+        }else{
+            $(lastColumnRow.find('select')[1]).find('option[value = "'+select+'"]').prop('selected' , true);
+        }
+        
+        if(columnsDefaultValues[i]['accountField']){
+            $(lastColumnRow.find('select')[2]).find('option[value = "'+columnsDefaultValues[i]['leadField']+'"]').prop('selected' , true);
+        }else{
+            $(lastColumnRow.find('select')[2]).find('option[value = "'+select+'"]').prop('selected' , true);
+        }
+        
+        //$(lastColumnRow.find('select')[0]).find('option[value = "'+columnsDefaultValues[i]['accountField']+'"]').prop('selected' , true);
+        //$(lastColumnRow.find('select')[1]).find('option[value = "'+columnsDefaultValues[i]['contactField']+'"]').prop('selected' , true);
+        $(lastColumnRow.find('select')[2]).find('option[value = "'+columnsDefaultValues[i]['leadField']+'"]').prop('selected' , true);
+    }
+    // in case of there is only one column row when page loads. then remove row button will not work.
+    if(columnsDefaultValues.length==0 || columnsDefaultValues.length==1){
+        $('#setColumns').children('div').find('button').each(function(){
+            $(this).attr('disabled','');
+        });
+    }
+}
+
+// getting all the user set columns data as a JS object to pass in controller.
+function applyColumns(){
+    var allFilter = [];
+    var filter = {};
+    var filterWithObject = {};
+    var filterWithObjectList = [];
+    var i = 0;
+    $('#setColumns').children('div').each(function(){
+            $(this).find('select').each(function(){
+                i++;
+                
+                if(i == 1 && $(this).find('option:selected').val() != 'Select'){
+                    filter['AccountField'] =  $(this).find('option:selected').val();
+                }else if(i == 1){
+                    filter['AccountField'] =  '';
+                }
+                
+                if(i == 2 && $(this).find('option:selected').val() != 'Select'){
+                    filter['ContactField'] =  $(this).find('option:selected').val();
+                }else if(i == 2){
+                    filter['ContactField'] =  '';
+                }
+                
+                if(i == 3 && $(this).find('option:selected').val() != 'Select'){
+                    filter['LeadField'] =  $(this).find('option:selected').val();
+                }else if(i == 3){
+                    filter['LeadField'] =  '';
+                }
+                
+            }); 
+            $(this).find('input[type = text]').each(function(){
+                filter['Column'] =  $(this).val();
+            });
+            $(this).find('input[type = checkbox]').each(function(){
+                filter['isFixed'] = $(this).prop('checked');
+            });
+            allFilter.push(filter);
+            filter = {};
+            i = 0;
+    });
+    filterWithObject['setColumns'] = allFilter;
+    return JSON.stringify(filterWithObject);
+}
+
+
+function addRow(idVal){
+    if(validateAddRow()){
+        //Remove Add Row Error first.If alredy Exists
+        $('#columnValidate').remove();
+        
+        // check if column row is 1 and adding row then remove disable attr from button(Remove Row).
+        if($('#setColumns').children('div').length==1){
+            $('#setColumns').children('div').first().find('button').each(function(){
+                $(this).removeAttr('disabled');
+            });
+        }
+        // Remove all the buttons at the bottom if adding row.
+        $('#'+idVal).children('button').remove();
+       
+        // get html content of last Row and append it to the Div Having Id "setColumns".
+        $('#'+idVal).append('<div class="slds-grid slds-gutters" >'+$('#'+idVal).children('div').last().html()+'</div>');
+        
+        //to set slds check box id dynamically per row.
+        setCheckBoxId();
+        
+        //When adding new row add unckecked checkbox always .
+        $($('#setColumns').children('div').last().find('input[type=checkbox]')).attr('checked' , false);
+        
+        // after adding row adding button at the bottom again.
+        $('#'+idVal).append('<button class="slds-button slds-button_neutral btnAddRow" id="addRowBtn" onclick="addRow('+'\''+'setColumns'+'\''+'); return false;">+ Add Row</button>');
+        //$('#'+idVal).append('<button class="slds-button slds-button_brand btnSave" id="saveBtn"   onclick="saveColumns(); return false;">Save Columns</button>');
+        $('#addRowBtn').text(addRowLabel);
+        //$('#saveBtn').text(saveLabel);
+    }else{
+        // showInvalidRowError('Please Fill Proper Input IN Row');
+    }
+}
+function showInvalidRowError(text){
+    
+        // in case trying to add row, and already last row is having any one input field empty. then show warning.
+        $('#columnValidate').remove();
+        $('#setColumns').prepend('<div id="columnValidate" ></div>');
+        // $('#columnValidate').html('<div class="slds-notify_container slds-is-relative">'+$('#warning').html()+'</div>');
+        $('#columnValidate').text(text);    
+}
+
+//here we are setting Id for "Is Fixed " checkbox in every Row. 
+// NOTE :: --   For same Id ,SLDS checkbox will not work.
+function setCheckBoxId(){
+    var lastColumnRowCheckbox = $('#setColumns').children('div').last().find('input[type=checkbox]')[0];
+    $(lastColumnRowCheckbox).attr('id',$(lastColumnRowCheckbox).attr('id')+$('#setColumns').children('div').length);
+    $(lastColumnRowCheckbox).attr('value',$(lastColumnRowCheckbox).attr('value')+$('#setColumns').children('div').length);
+    $($($($('#setColumns').children('div').last()).children('div').last().prev()).find('label').last()).attr('for',$(lastColumnRowCheckbox).attr('id'));
+}
+
+// validating add  row , returns false If any of input field left blank/unselected in Row.
+function validateAddRow(){
+    $('#columnValidate').remove();
+    var allow = false;
+    var colNames = [];
+    var matchedCol = false;
+    var isThereAnyError = false;
+    var i=0;
+    $('#setColumns').children('div').each(function(){
+        allow = false;
+        matchedCol = false;
+        var existingColumnName = $(this).find('input[type = text]').val();
+        // using toLC and replace methods, so that we could compare (Name && name as same column) and (Name && name With any no of white spaces as same column).
+        if(colNames.includes(existingColumnName!=undefined?String(existingColumnName).toLowerCase().replace(/\s/g, ""):'')){
+            showInvalidRowError(dupicateColumnName+' '+$(this).find('input[type = text]').val());
+            matchedCol = true;
+            allow = false;
+        }
+        //checking for select list  left unselected.
+        $(this).find('select').each(function(){
+            if(($(this).find('option:selected').val() != $(this).attr('label-value')) && !matchedCol){
+                //$(this).css('border','1px solid red');
+                // allow = false;
+                // console.log('Came :: '+$(this).find('option:selected').val() +'  : '+$(this).attr('label-value'));
+                allow = true;
+            }
+        });
+        //checking for input text left blank.
+        $(this).find('input[type = text]').each(function(){
+            if(($(this).val() == '' || $(this).val() == undefined && !matchedCol) || !allow){
+                $(this).css('border','1px solid red');
+                allow = false;
+            }else{
+                colNames.push(($(this).val()!=undefined?$(this).val().toLowerCase().replace(/\s/g, ""):''));
+                $(this).css('border','');
+            }
+        });
+        if(!matchedCol && allow==false){
+            showInvalidRowError(addRowValidation);
+            return allow;
+        }
+        i++;
+    });
+    return allow;
+}
+
+// This method calls apex controller method to save columns detail in CS. 
+function saveColumns(){
+    var customColumns = ['Campaign','CBM_Massnahme__c','CBM_Aktion__c'];
+    // alert('getFilterFilter(customColumns) ::'+getFilterFilter(customColumns));
+    if(validateAddRow()){
+        $('#columnValidate').remove();
+        Visualforce.remoting.Manager.invokeAction(
+        'CCG_SpenderSelectionConfiguration.saveColumns', applyColumns(),getFilterFilter(customColumns),
+            function(result, event) {
+                if (event.status) {
+                    $('#successColumns').removeClass('slds-hide');
+                    // $("#successColumns").slideUp(3000);
+                }else if (event.type === 'exception') {
+                    alert(
+                        'Exception in getting fieldsets'
+                    );
+                } else {
+                    alert(
+                        'Anonymous Error occured while getting fieldsets'
+                    );
+                }
+        });
+    }
+    // else{
+    //     $('#columnValidate').remove();
+    //     $('#setColumns').prepend('<div id="columnValidate" ></div>');
+    //     $('#columnValidate').text('Please Fill Proper Input IN Row');
+    // }
+}
+
+ // Here we are validating user to select max 10 fields in multi-select PickList.
+function shiftFieldsToSelectedList(selectedTabId,buttonId,btnType){
+//   if($('#selected'+selectedTabId).find('li').length == 9 && btnType == 'right'){
+//         $('#'+buttonId).attr('disabled','true');
+//         $('#noMoreFields').text('You Can Select Maximum 10 Fields');
+//         $('#noMoreFields').removeClass('slds-hide');
+//     }
+//     if($('#selected'+selectedTabId).find('li').length == 10 && btnType == 'left'){
+//         $('#'+buttonId).removeAttr('disabled');
+//         $('#noMoreFields').addClass('slds-hide');
+//     }
+}
+
+//This method returns all selected filter fields per object in JS object.
+function getFilterFilter(allFilteringObjects){
+    var i=0;
+    var lstOfFileds = [];
+    var selectedFields = {};
+    var objectSelectedFields = {};
+    var objectWithFields = [];
+    for(i=0 ; i<allFilteringObjects.length ; i++){
+        $('#selected'+allFilteringObjects[i]).find('li').each(function(){
+            selectedFields['fieldApiName'] = $(this).attr('id');
+            selectedFields['fieldLabel'] = $(this).text();
+            lstOfFileds.push(selectedFields);
+            selectedFields={};
+        });
+        objectSelectedFields['objName'] = allFilteringObjects[i];
+        objectSelectedFields['fields'] = lstOfFileds;
+        objectWithFields.push(objectSelectedFields);
+        lstOfFileds = [];
+        objectSelectedFields = {};
+    }
+    return '{"setFilterFields":'+JSON.stringify(objectWithFields)+'}';
+}
+
+ // calls apex controller method to save filter fields detail in CS.
+function SaveFilterFilter(){
+    Visualforce.remoting.Manager.invokeAction(
+        'CCG_SpenderSelectionConfiguration.saveFilterFields',getFilterFilter(allObjects),
+            function(result, event) {
+                if (event.status) {
+                    $('#successColumns').removeClass('slds-hide');
+                    // $("#successColumns").slideUp(5000);
+                }else if (event.type === 'exception') {
+                    alert(
+                        'Exception in getting fieldsets'
+                    );
+                } else {
+                    alert(
+                        'Anonymous Error occured while getting fieldsets'
+                    );
+                }
+        });
+}
+
+function setFilter(){
+    Visualforce.remoting.Manager.invokeAction(
+        'CCG_SpenderSelectionConfiguration.allAboutObjectSpecificFilter',  
+            function(result, event) {
+                if (event.status) {
+                    
+                    var numberOfTabs = JSON.parse(result.replace(/(&quot\;)/g, '\"'))['lstOfFilterFieldTabWrpr'].length;
+                    Handlebars.registerHelper('checkLength', function(count) {
+                        if(numberOfTabs-1 == count){ // Or === depending on your needs
+                            return true;
+                        }
+                        return false;
+                    });
+                    
+                    
+                    Handlebars.registerHelper('removeUnderScore', function(obj) {
+                        return obj.replace(/_/g, "");
+                    });
+                    //debugger;
+                    // creating Dom for parent Tabs using Handlebars and their content.
+                    var source = $("#allTabs").html(); 
+                    var template = Handlebars.compile(source);
+                    var sourceData={}; 
+                        // sourceData['objName'] = JSON.parse(result.replace(/(&quot\;)/g, '\"'))['lstOfFilterFieldTabWrpr']; 
+                        sourceData['objName'] = fixZusatzverteilerObjectAtFirstPosition(JSON.parse(result.replace(/(&quot\;)/g, '\"'))['lstOfFilterFieldTabWrpr']); 
+                        
+                        // console.log('sourceData',sourceData);
+                    var filterDetail = (result != '' && result != undefined) ? template(sourceData) : '';
+                    
+                    if(filterDetail != ''){
+                        $('#allTabsContainer').html(filterDetail);
+                    }else{
+                        $('#allTabsContainer').html(filterDetail);  
+                    }
+                    // initializing the parent Tabs.
+                    $(document).ready(function() {
+                        $('[data-aljs="parentTabs"]').tabs({
+                            defaultTabId: 'objectFlterFields',
+                            onChange: function(obj) {}
+                        });
+                    });
+                    
+                    $(document).ready(function() {
+                        $('[data-aljs="tabs"]').tabs({
+                            defaultTabId: 'tab-default-1',
+                            onChange: function(obj) {}
+                        });
+                    });
+                    
+                    //addObjectModalShow(JSON.parse(result.replace(/(&quot\;)/g, '\"'))['objeDescr']);
+                    
+                    // Holds the list of fields per object.
+                    var filterFieldObjectSpecific = JSON.parse(result.replace(/(&quot\;)/g, '\"'));
+                    
+                    // to populate OR  set the column data.
+                    populateColumnsData(columnDataForObjects);
+                    // to populate OR  set the multi select list data for "Set Filter Fields Tab".
+                    
+                    // console.log('filterFieldObjectSpecific  :: '+JSON.stringify(filterFieldObjectSpecific['lstOfFilterFieldTabWrpr'][0]));
+                    // populateMultiSelect(filterFieldObjectSpecific['lstOfFilterFieldTabWrpr'],true);
+                    populateMultiSelect(fixZusatzverteilerObjectAtFirstPosition(filterFieldObjectSpecific['lstOfFilterFieldTabWrpr']),true);
+                    
+                    showCustomColumnsObjectFields(columnCustomObjectFields);
+                    
+                    //removeObjectModalShow(filterFieldObjectSpecific['lstOfFilterFieldTabWrpr']);
+                    
+                    // for the "Custom " SubTab Of "Set Column Tab"
+                    populateMultiSelect(columnCustomObjectFields,false);
+                    
+                    $(document).ready(function() {
+                        $('[data-aljs="subTabsColumns"]').tabs({
+                            defaultTabId: 'setColumns',
+                            onChange: function(obj) {}
+                        });
+                    });
+                    
+                    
+                    endLoading();
+                } else if (event.type === 'exception') {
+                    alert(
+                        'Exception in getting fieldsets'
+                    );
+                } else {
+                    alert(
+                        'Anonymous Error occured while getting fieldsets'
+                    );
+                }
+            }
+        );
+}
+// called to set "Zusatzverteiler" at zero index of array of objects "filterFieldObjectSpecific".
+function fixZusatzverteilerObjectAtFirstPosition(filterFieldObjectSpecific){
+    var i=0;
+    var objname = 'CBM_MUF_Zusatzverteiler__c';
+    var matchedIndexOjbect ;
+    for(i=0;i<filterFieldObjectSpecific.length;i++){
+        if(filterFieldObjectSpecific[i]['obj'].toLowerCase() == objname.toLowerCase()){
+            matchedIndexOjbect = filterFieldObjectSpecific[i];
+            filterFieldObjectSpecific.splice(i,i);
+            break;
+        }
+    }
+    if(matchedIndexOjbect!=undefined && filterFieldObjectSpecific!=undefined){
+        filterFieldObjectSpecific.splice(0, 0,matchedIndexOjbect);
+    }
+    return filterFieldObjectSpecific;
+}
+
+function showCustomColumnsObjectFields(columnCustomObjectFields){
+        var source = $("#customObjectsColumn").html(); 
+        var template = Handlebars.compile(source);
+        var sourceData={};
+            sourceData['objName'] = columnCustomObjectFields;
+            //console.log('sourceData',sourceData);
+        var filterDetail = (columnCustomObjectFields != '' && columnCustomObjectFields != undefined) ? template(sourceData) : '';
+        
+        if(filterDetail != ''){
+            $('#custom').html(filterDetail);
+        }else{
+            $('#custom').html(filterDetail);  
+        }
+        // initializing the parent Tabs.
+        $(document).ready(function() {
+            $('[data-aljs="tabsCustomColumnObject"]').tabs({
+                defaultTabId: 'Campaign',
+                onChange: function(obj) {}
+            });
+        });
+}
+
+function addRemoveObject(operation,selectedObj,selectedAccFields){
+    if($('#selectObject option:selected').val()==$('#selectObject').attr('label-value') && operation=='Insert'){
+        // alert('Insert');
+        return $('#selectObject').css('border','1px solid red');
+    }else if($('#selectField option:selected').val()==$('#selectField').attr('label-value') && operation=='Insert'){
+        // alert('Insert');
+        return $('#selectField').css('border','1px solid red');
+    }
+    //else if($('#removeObject option:selected').val() == $('#removeObject').attr('label-value') && operation=='Delete'){
+        // alert('delete');
+        //return $('#removeObject').css('border','1px solid red');
+    //}
+    //$('#removeObjectModal').addClass('slds-hide');
+    $('#addObjectModal').addClass('slds-hide'); 
+    startLoading();
+    Visualforce.remoting.Manager.invokeAction(
+        'CCG_SpenderSelectionConfiguration.addObject',selectedObj,selectedAccFields,operation,
+            function(result, event) {
+                if (event.status) {
+                    
+                    $('#successColumns').removeClass('slds-hide');
+                    
+                    setFilter();
+                    // $("#successColumns").slideUp(5000);
+                    
+                }else if (event.type === 'exception') {
+                    alert(
+                        'Exception in getting fieldsets'
+                    );
+                } else {
+                    alert(
+                        'Anonymous Error occured while getting fieldsets'
+                    );
+                }
+    });
+}
+
+function showFieldsPerSelectedObject(selectedObj){
+    $('#accFields').removeAttr('disabled');$('#selectObject').css('border','');
+    
+    Visualforce.remoting.Manager.invokeAction(
+        'CCG_SpenderSelectionConfiguration.showFields',selectedObj,
+            function(result, event) {
+                if (event.status) {
+                    var allFields = JSON.parse(result.replace(/(&quot\;)/g, '\"'));
+                    var source = $("#SelectAccFieldForSelectedObject").html(); 
+                    var template = Handlebars.compile(source);
+                    var sourceData={};
+                        sourceData['objFields'] = JSON.parse(result.replace(/(&quot\;)/g, '\"')); 
+
+                    var filterDetail = (result != '' && result != undefined) ? template(sourceData) : '';
+                    // alert(filterDetail+' :: '+allFields);
+                    if(allFields=='' || allFields==null){
+                        $('#addobjectButton').attr('disabled','');
+                    }
+                    if(allFields!='' || allFields==null){
+                        $('#addobjectButton').removeAttr('disabled');
+                    }
+                    $('#objFields').html(filterDetail);
+                }else if (event.type === 'exception') {
+                    alert(
+                        'Exception in getting fieldsets'
+                    );
+                } else {
+                    alert(
+                        'Anonymous Error occured while getting fieldsets'
+                    );
+                }
+    });
+}
+
+function addObjectModalShow(addObj){
+        var source = $("#addObjectInterface").html(); 
+        var template = Handlebars.compile(source);
+        
+        addObj = addObj.sort(function(a, b) {
+            return (a.objectLabel > b.objectLabel) ? 1 : ((b.objectLabel > a.objectLabel) ?
+                -1 : 0);
+        });
+        
+        var sourceData={};
+            sourceData['objNameDesc'] = addObj;
+            
+        var filterDetail = (addObj != '' && addObj != undefined) ? template(sourceData) : '';
+        //$('#addObjectModal').removeClass('slds-hide');
+        $('#addObjectModalContent').html(filterDetail);
+}
+
+function removeObjectModalShow(removeObj){
+        var source = $("#removeObjectInterface").html(); 
+        var template = Handlebars.compile(source);
+        var sourceData={};
+            sourceData['objNameDesc'] = removeObj; 
+        var filterDetail = (removeObj != '' && removeObj != undefined) ? template(sourceData) : '';
+        $('#removeObjectModalContent').html(filterDetail);
+}
+
+//populating column Tabs already set data and creating no of rows automatically as per detail saved In CS.
+function populateColumnsData(filterFieldObjectSpecific){
+    var columnsDefaultValues = columnsDetail;
+    var i = 0;
+    var main = {};
+    var objectSpecificFieldsList = [];
+    var objectSpecificFields = {};
+    if(filterFieldObjectSpecific != undefined){
+        for(i=0 ; i<filterFieldObjectSpecific.length ; i++){
+            objectSpecificFields['obj'] = filterFieldObjectSpecific[i]['obj'];
+            objectSpecificFields['fields'] = filterFieldObjectSpecific[i]['unSelectedFields'].concat(filterFieldObjectSpecific[i]['selectedFields']).sort(function(a, b) {
+                                                    return (a.fieldLabel > b.fieldLabel) ? 1 : ((b.fieldLabel > a.fieldLabel) ? -1 : 0);
+                                                });
+            objectSpecificFieldsList.push(objectSpecificFields);
+            objectSpecificFields = {};
+        }
+    }
+    main['objName'] = objectSpecificFieldsList;
+    
+    Handlebars.registerHelper('checkAccount', function(objName) {
+        if(objName == 'Account'){ // Or === depending on your needs
+            return true;
+        }
+        return false;
+    });
+    Handlebars.registerHelper('checkContact', function(objName) {
+        if(objName == 'Contact'){ // Or === depending on your needs
+            return true;
+        }
+        return false;
+    });
+    Handlebars.registerHelper('checkLead', function(objName) {
+        if(objName == 'Lead'){ // Or === depending on your needs
+            return true;
+        }
+        return false;
+    });
+    //console.log('main  :: '+JSON.stringify(main));
+    // for coumns related Tab content being set from here. 
+    var sourceColumn = $("#columns").html(); 
+    var templateColumn = Handlebars.compile(sourceColumn);
+    $('#setColumns').html(templateColumn(main));
+    prePopulateValues(columnsDefaultValues);
+}
+
+//populating Filter Field Tabs already set data and Showng selected and non selected fields per object.
+function populateMultiSelect(filterFieldObjectSpecific,NeedToAddObjects){
+    var unselectedItems = [];
+    var selectedItems = [];
+    var fieldProperty = {};
+    
+    var i=0;
+    var j=0;
+    var objAsId;
+    for(i=0 ; i<filterFieldObjectSpecific.length ; i++){
+            unselectedItems=[];
+            selectedItems = [];
+            if(NeedToAddObjects==true){// Here we are adding only those objects Which are available in Tab "Set Filter Fields".
+                allObjects.push(filterFieldObjectSpecific[i]["obj"]);
+            }
+            for(j = 0 ; j<filterFieldObjectSpecific[i]['unSelectedFields'].length ; j++){
+                fieldProperty['id'] = filterFieldObjectSpecific[i]['unSelectedFields'][j]['fieldApiName']; 
+                fieldProperty['label'] = filterFieldObjectSpecific[i]['unSelectedFields'][j]['fieldLabel'];
+                unselectedItems.push(fieldProperty);
+                fieldProperty={};
+            }
+            for(j = 0 ; j<filterFieldObjectSpecific[i]['selectedFields'].length ; j++){
+                fieldProperty['id'] = filterFieldObjectSpecific[i]['selectedFields'][j]['fieldApiName']; 
+                fieldProperty['label'] = filterFieldObjectSpecific[i]['selectedFields'][j]['fieldLabel'];
+                selectedItems.push(fieldProperty);
+                fieldProperty={};
+            }
+            if(selectedItems.length==10){
+                //$('#btnRight'+filterFieldObjectSpecific[i]["obj"]).attr('disabled','true');
+            }
+            objAsId = '[data-aljs="multi-select'+filterFieldObjectSpecific[i]["obj"]+'"]';
+            
+            unselectedItems = unselectedItems.sort(function(a, b) {
+                return (a.label > b.label) ? 1 : ((b.label > a.label) ?
+                    -1 : 0);
+            });
+            
+            selectedItems = selectedItems.sort(function(a, b) {
+                return (a.label > b.label) ? 1 : ((b.label > a.label) ?
+                    -1 : 0);
+            });
+            
+            $(objAsId).multiSelect({
+                    unselectedItems: unselectedItems,
+                    selectedItems: selectedItems
+            });
+            j=0;
+    }
+}
+
+
+
+======================================================================================================================================================
+
+
+
+
+
+
+
